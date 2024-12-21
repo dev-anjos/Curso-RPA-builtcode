@@ -58,7 +58,7 @@ for keys in wordKeys:
 
     links = []
     itens = []
-    limitOfLinks = 2
+    limitOfLinks = 300 # limite de links a serem coletados
 
     sleep(2)
     frameEditals = (
@@ -68,7 +68,7 @@ for keys in wordKeys:
     while len(links) < limitOfLinks:
         sleep(5)
         for i, x in enumerate(frameEditals.find_elements(By.XPATH, '//*[@title= "Acessar item."]')):
-            if i >= 2: #contador adicionado pois o elemento se repete 300 vezes na pagina, portanto a cada 100 ele vai para a proxima pagina
+            if i >= 100: #contador adicionado pois o elemento se repete 300 vezes na pagina, portanto a cada 100 ele vai para a proxima pagina
                 break
             link = x.get_attribute("href")
             links += [link]
