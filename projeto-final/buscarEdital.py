@@ -6,17 +6,18 @@ from selenium.common.exceptions import NoSuchElementException
 from datetime import datetime
 from selenium import webdriver 
 from selenium.webdriver.chrome.options import Options
+from tqdm import tqdm
 import csv
 import pyautogui as py
 
 #funcao para realizar scroll
 scrollToElement = "arguments[0].scrollIntoView({ block: 'center' });"
 
+## Configurações
 options = Options()
 options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.5735.110 Safari/537.36")
 options.add_argument("--disable-blink-features=AutomationControlled")
 options.add_argument("--disable-extensions") 
-options.add_argument("--disable-gpu")  
 options.add_argument("--no-sandbox") 
 
 navegador = webdriver.Chrome(options=options)
@@ -59,6 +60,7 @@ for keys in wordKeys:
     itens = []
     limitOfLinks = 2
 
+    sleep(2)
     frameEditals = (
         navegador.find_element(By.XPATH,'//*[@id="main-content"]/pncp-list/pncp-results-panel/pncp-tab-set/div/pncp-tab[1]/div/div[2]/div/div[2]/pncp-items-list')
     )
@@ -72,7 +74,7 @@ for keys in wordKeys:
             links += [link]
             i += 1
 
-        print(f"l{len(links)}\n")
+        print(f"Coletados {len(links)} editais da palavra {keys}\n")
 
         nextPage = navegador.find_element(By.XPATH, '//*[@data-next-page="data-next-page"]')
         sleep(5)
@@ -80,7 +82,7 @@ for keys in wordKeys:
         sleep(5)
         nextPage.click()
 
-    for link in links:
+    for link in tqdm(links, desc=f"Abrindo editais da palavra {keys}: ", colour="green", unit="editais"):
         navegador.get(link)
         sleep(5)
      
@@ -96,7 +98,6 @@ for keys in wordKeys:
             sleep(2)
 
             fiftyResults = numberOfResults.find_element(By.XPATH, '//*[@class="scrollable-content"]/div/span[text()="50"]')
-        
             sleep(2)
             fiftyResults.click()
 
@@ -106,9 +107,7 @@ for keys in wordKeys:
             sleep(5)
 
         except Exception as e:
-            print("Erro ao carrega detalhes do edital")
-
-        print(f"abriu o site: {link}")
+            print(f"Erro ao carrega detalhes do edital: {e}")
 
         buttonDetail = navegador.find_elements(By.XPATH, '//*[@class="br-button circle ng-star-inserted"]')
         sleep(2)
@@ -157,7 +156,6 @@ for keys in wordKeys:
                 valorUnitHomologado = get_element_text('//html/body/modal-container/div[2]/div/div/div/div/div[1]/div[6]/div/div[2]/div/div[5]/div[2]/p/span')
                 valorTotalHomologado = get_element_text('//html/body/modal-container/div[2]/div/div/div/div/div[1]/div[6]/div/div[2]/div/div[5]/div[3]/p/span')
                 percentualDescontoJulgamento =  get_element_text('/html/body/modal-container/div[2]/div/div/div/div/div[1]/div[6]/div/div[2]/div/div[6]/div/p/span')
-
                     
                 item = [
                     {
@@ -193,9 +191,8 @@ for keys in wordKeys:
                     }
                 ]
                 itens.append(item)
-                print(item)
             except Exception as e:
-                print(f"Não foi possivel pegar o item {e}")
+                print(f"Não foi possivel pegar o item: {e}")
     
             sleep(2)
             btnReturn = navegador.find_element(By.XPATH, '//*[@class="br-button primary small m-2"]')
@@ -203,26 +200,16 @@ for keys in wordKeys:
             btnReturn.click()
             sleep(2)
 
-
 arquivo_csv = F'dados/dados{datetime.now().strftime("%Y%m%d%H%M%S")}.csv'
-# Verificar se o arquivo já existe
-# if not os.path.exists(arquivo_csv):
 
 with open(arquivo_csv, mode='x', newline='', encoding='utf-8') as file:
     writer = csv.writer(file)
-    
-    # Escrever a primeira linha com os cabeçalhos (nomes das chaves)
     cabecalhos = itens[0][0].keys() 
     writer.writerow(cabecalhos)
     
-    # Escrever as linhas seguintes com os valores
     for item_list in itens:
         for item in item_list:
-            valores = item.values()  # Obtém os valores do item
+            valores = item.values()  
             writer.writerow(valores)
 
 print(f"CSV '{arquivo_csv}' criado com sucesso!")
-# else:
-#     print("CSV criado com sucesso!")
-
-sleep(5)
