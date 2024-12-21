@@ -200,7 +200,7 @@ for keys in wordKeys:
             btnReturn.click()
             sleep(2)
 
-arquivo_csv = F'dados/dados{datetime.now().strftime("%Y%m%d%H%M%S")}.csv'
+arquivo_csv = F'csv/dados{datetime.now().strftime("%Y%m%d%H%M%S")}.csv'
 
 with open(arquivo_csv, mode='x', newline='', encoding='utf-8') as file:
     writer = csv.writer(file)
